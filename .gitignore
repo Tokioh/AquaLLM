@@ -1,0 +1,28 @@
+# Ignorar archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar directorios de dependencias
+frontend/node_modules/
+frontend/build/
+
+# Ignorar entorno virtual de Python
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+
+# ¡¡MUY IMPORTANTE!! Ignorar archivos de secretos y variables de entorno
+.env
+backend/.env
+frontend/.env.local
+frontend/.env
+
+# Ignorar configuraciones de IDE
+.vscode/
+.idea/
