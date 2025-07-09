@@ -1,0 +1,36 @@
+.message-box-container {
+  display: flex;
+  margin: 10px 0;
+}
+
+.message-box {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  color: #fff;
+}
+
+/* Estilos para los mensajes del bot */
+.bot-message {
+  justify-content: flex-start; /* Alinea a la izquierda */
+}
+
+.bot-message .message-box {
+  background-color: #4a4e5a;
+  color: #fff;
+}
+
+/* Estilos para los mensajes del usuario */
+.user-message {
+  justify-content: flex-end; /* Alinea a la derecha */
+}
+
+.user-message .message-box {
+  background-color: #007bff; /* Un azul para el usuario */
+  color: #fff;
+}
+
+.message-box p {
+  margin: 0;
+  white-space: pre-wrap; /* Respeta los saltos de línea en la respuesta */
+}
