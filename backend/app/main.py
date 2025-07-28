@@ -149,4 +149,4 @@ async def quick_query_handler(request: QuickQueryRequest):
         
     except Exception as e:
         print(f"Error en consulta rápida: {e}")
-        raise HTTPException(status_code=500, detail="Error interno del servidor")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")# Forzando reinicio
