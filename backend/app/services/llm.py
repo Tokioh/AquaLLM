@@ -5,19 +5,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Configuración para Hugging Face (opcional, como respaldo) ---
-HAPI_KEY = os.environ.get("HUGGINGFACE_API_KEY")
-headers = {"Authorization": f"Bearer {HAPI_KEY}"}
-
 # --- Configuración para Ollama (local) ---
 OLLAMA_API_URL = "http://localhost:11434/api/generate"  # Usaremos /api/generate
 
-def construir_prompt(pregunta_usuario: str, datos_cliente: dict) -> str:
+def construir_prompt(pregunta_usuario: str, datos_cliente: dict, historial: list = None) -> str:
     """
-    Construye el prompt para enviar a la API de Ollama.
+    Construye el prompt para enviar a la API de Ollama, incluyendo el historial.
     """
+    # 1. Construir el historial de la conversación
+    historial_str = ""
+    if historial:
+        for intercambio in historial:
+            historial_str += f"Usuario: {intercambio.pregunta}\n"
+            historial_str += f"AquaBot: {intercambio.respuesta}\n"
+        historial_str += "\n"
 
-    # 1. Construir el mensaje del sistema con el contexto
+
+    # 2. Construir el mensaje del sistema con el contexto
     if not datos_cliente or not datos_cliente.get('cliente'):
         # Si no hay datos, pedimos el número de cliente, medidor o factura.
         return (
@@ -30,15 +34,18 @@ def construir_prompt(pregunta_usuario: str, datos_cliente: dict) -> str:
     prompt = (
         f"Eres un asistente virtual de atención al cliente para una empresa de agua potable. "
         f"Tu nombre es AquaBot. Eres amable, servicial y muy preciso. "
-        f"Usa SOLAMENTE la información proporcionada para responder a la pregunta del cliente. "
+        f"Usa SOLAMENTE la información proporcionada y el historial de la conversación para responder a la pregunta del cliente. "
         f"No inventes información. Si la respuesta no está en los datos, indica amablemente que no tienes esa información. "
         f"Dirígete al cliente por su nombre de pila (si está disponible). Responde en español.\n\n"
         f"Los datos devueltos deben estar organizados de manera legible y clara\n\n"
         f"si la respuesta de la base de datos es un json,transformalo y organizalo como texto plano para que se muestre de manera legible.\n\n"
+        f"--- INICIO HISTORIAL DE CONVERSACIÓN ---\n"
+        f"{historial_str}"
+        f"--- FIN HISTORIAL DE CONVERSACIÓN ---\n\n"
         f"--- INICIO DE DATOS DEL CLIENTE ---\n"
         f"{contexto_str}\n"
         f"--- FIN DE DATOS DEL CLIENTE ---\n\n"
-        f"Pregunta: {pregunta_usuario}\n"
+        f"Pregunta actual: {pregunta_usuario}\n"
         f"Respuesta:"
     )
 

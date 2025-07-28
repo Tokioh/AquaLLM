@@ -46,8 +46,9 @@ async def chat_handler(request: ChatRequest):
     if datos_cliente.get("error"):
         raise HTTPException(status_code=500, detail=datos_cliente.get("error"))
 
-    # 2. Construir el prompt
-    prompt = construir_prompt(request.question, datos_cliente)
+    # 2. Construir el prompt con el historial de conversación
+    historial = request.history if request.history else []
+    prompt = construir_prompt(request.question, datos_cliente, historial)
 
     # 3. Generar respuesta del LLM usando la función de Ollama
     respuesta_llm = generar_respuesta_llm_ollama(prompt)

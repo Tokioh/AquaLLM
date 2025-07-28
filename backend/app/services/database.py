@@ -90,3 +90,30 @@ async def buscar_datos_cliente(identificador: str) -> dict:
     except Exception as e:
         print(f"Error al buscar datos del cliente: {e}")
         return {"error": str(e)}
+
+async def guardar_conversacion(session_id: str, pregunta: str, respuesta: str):
+    """Guarda un intercambio de chat en la base de datos."""
+    if not supabase or not session_id:
+        return
+
+    try:
+        supabase.table('conversaciones').insert({
+            "session_id": session_id,
+            "pregunta": pregunta,
+            "respuesta": respuesta
+        }).execute()
+    except Exception as e:
+        print(f"Error al guardar la conversación: {e}")
+
+async def obtener_historial_conversacion(session_id: str, limit: int = 3) -> list:
+    """Obtiene el historial de conversación para una sesión."""
+    if not supabase or not session_id:
+        return []
+
+    try:
+        response = supabase.table('conversaciones').select('pregunta, respuesta').eq('session_id', session_id).order('created_at', desc=True).limit(limit).execute()
+        # Invertimos el resultado para que el orden sea cronológico
+        return list(reversed(response.data))
+    except Exception as e:
+        print(f"Error al obtener el historial de conversación: {e}")
+        return []

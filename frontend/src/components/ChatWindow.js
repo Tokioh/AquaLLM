@@ -7,6 +7,7 @@ const ChatWindow = () => {
   const [userInput, setUserInput] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState([]);
 
   const messagesEndRef = useRef(null);
 
@@ -39,6 +40,7 @@ const ChatWindow = () => {
         body: JSON.stringify({
           question: userInput,
           identifier: identifier,
+          history: conversationHistory,
         }),
       });
 
@@ -49,6 +51,13 @@ const ChatWindow = () => {
       const data = await response.json();
       const botResponse = { text: data.answer, sender: 'bot' };
       setMessages(prevMessages => [...prevMessages, botResponse]);
+      
+      // Actualizar el historial de conversación con esta interacción
+      const newHistoryItem = {
+        pregunta: userInput,
+        respuesta: data.answer
+      };
+      setConversationHistory(prev => [...prev, newHistoryItem]);
 
     } catch (error) {
       console.error("Error al llamar a la API:", error);
