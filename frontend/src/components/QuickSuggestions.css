@@ -132,6 +132,111 @@
   }
 }
 
+/* Estilos para panel desplegable */
+.quick-suggestions.collapsed {
+  margin-bottom: 10px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.suggestions-toggle {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.suggestions-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-weight: 500;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+}
+
+.toggle-text {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.toggle-arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.toggle-arrow.up {
+  transform: rotate(180deg);
+}
+
+.quick-preview {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preview-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.suggestions-panel {
+  overflow: hidden;
+  transition: all 0.4s ease;
+  background: linear-gradient(135deg, #e2edfd 0%, #c4dbff 100%);
+  border-radius: 12px;
+  margin-top: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.suggestions-panel.show {
+  max-height: 600px;
+  padding: 20px;
+  opacity: 1;
+}
+
+.suggestions-panel.hide {
+  max-height: 0;
+  padding: 0 20px;
+  opacity: 0;
+}
+
+/* Responsive para toggle */
+@media (max-width: 768px) {
+  .toggle-content {
+    font-size: 0.9rem;
+  }
+  
+  .quick-preview {
+    gap: 6px;
+  }
+  
+  .preview-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 480px) {
   .quick-suggestions {
     padding: 15px;
@@ -144,5 +249,9 @@
   
   .tab-button {
     min-width: 50px;
+  }
+
+  .suggestions-toggle {
+    padding: 10px 14px;
   }
 }

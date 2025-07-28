@@ -3,6 +3,7 @@ import './QuickSuggestions.css';
 
 const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
   const [activeTab, setActiveTab] = useState('finanzas');
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const suggestions = {
     finanzas: [
@@ -47,37 +48,52 @@ const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
   };
 
   return (
-    <div className="quick-suggestions">
-      <div className="suggestions-header">
-        <h3>💡 Preguntas Frecuentes</h3>
-        <p>Haz clic en cualquier pregunta para obtener una respuesta rápida</p>
-      </div>
-      
-      <div className="tabs-container">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-            disabled={isLoading}
-          >
-            <span className="tab-icon">{tab.icon}</span>
-            <span className="tab-label">{tab.label}</span>
-          </button>
-        ))}
+    <div className={`quick-suggestions ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      {/* Botón de toggle compacto */}
+      <div className="suggestions-toggle" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="toggle-content">
+          <span className="toggle-icon">💡</span>
+          <span className="toggle-text">
+            {isExpanded ? 'Ocultar Sugerencias' : 'Preguntas Frecuentes'}
+          </span>
+          <span className={`toggle-arrow ${isExpanded ? 'up' : 'down'}`}>
+            {isExpanded ? '▲' : '▼'}
+          </span>
+        </div>
       </div>
 
-      <div className="suggestions-grid">
-        {suggestions[activeTab].map(suggestion => (
-          <button
-            key={suggestion.id}
-            className="suggestion-button"
-            onClick={() => handleSuggestionClick(suggestion)}
-            disabled={isLoading || !identifier}
-          >
-            {suggestion.text}
-          </button>
-        ))}
+      {/* Panel expandible */}
+      <div className={`suggestions-panel ${isExpanded ? 'show' : 'hide'}`}>
+        <div className="suggestions-header">
+          <p>Haz clic en cualquier pregunta para obtener una respuesta rápida</p>
+        </div>
+        
+        <div className="tabs-container">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              disabled={isLoading}
+            >
+              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-label">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="suggestions-grid">
+          {suggestions[activeTab].map(suggestion => (
+            <button
+              key={suggestion.id}
+              className="suggestion-button"
+              onClick={() => handleSuggestionClick(suggestion)}
+              disabled={isLoading || !identifier}
+            >
+              {suggestion.text}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
