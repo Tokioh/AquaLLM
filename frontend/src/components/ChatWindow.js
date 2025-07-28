@@ -89,7 +89,12 @@ const ChatWindow = () => {
               }
               
               if (data.error) {
-                throw new Error(data.status || 'Error desconocido');
+                // Error específico del servidor (como identificador incorrecto)
+                const errorMessage = { text: data.error, sender: 'bot' };
+                setMessages(prevMessages => [...prevMessages, errorMessage]);
+                setProcessingStatus('');
+                setIsLoading(false);
+                return; // Salir aquí para evitar continuar el loop
               }
             } catch (parseError) {
               console.error('Error parsing JSON:', parseError);
@@ -102,6 +107,8 @@ const ChatWindow = () => {
       console.error("Error al llamar a la API:", error);
       const errorMessage = { text: "Lo siento, no pude conectarme con mis sistemas. Por favor, intenta de nuevo más tarde.", sender: 'bot' };
       setMessages(prevMessages => [...prevMessages, errorMessage]);
+    } finally {
+      // Asegurar que siempre se reseteen los estados, sin importar el tipo de error
       setProcessingStatus('');
       setIsLoading(false);
     }
