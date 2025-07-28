@@ -1,10 +1,10 @@
 .chat-window {
   width: 80%;
-  max-width: 800px;
-  height: 70vh;
+  max-width: 900px;
+  height: 75vh;
   margin: auto;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   background-color: #fff;
@@ -21,32 +21,38 @@
 
 .input-area {
   display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
+  padding: 8px;
+  border: 1px solid #ccc;
   background-color: #f9f9f9;
+  border-radius: 10px 10px 10px 10px;
 }
 
 .input-field {
   flex-grow: 1;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 20px;
+  border-radius: 10px;
   margin-right: 10px;
   font-size: 1rem;
 }
 
 .send-button {
-  padding: 10px 20px;
+  padding: 10px 24px;
   border: none;
   background-color: #007bff;
   color: white;
-  border-radius: 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.25);
+  transition: all 0.3s ease;
 }
 
 .send-button:hover {
-  background-color: #0056b3;
+  background-color: #339dff;
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.45);
+  transform: translateY(-1px);
 }
 
 /* Estilos para el indicador de estado de procesamiento */

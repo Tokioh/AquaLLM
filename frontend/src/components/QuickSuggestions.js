@@ -32,10 +32,10 @@ const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
   };
 
   const tabs = [
-    { id: 'finanzas', label: '💰 Finanzas', icon: '💰' },
-    { id: 'consumo', label: '🚰 Consumo', icon: '🚰' },
-    { id: 'servicio', label: '🔧 Servicio', icon: '🔧' },
-    { id: 'pagos', label: '💳 Pagos', icon: '💳' }
+    { id: 'finanzas', label: 'Finanzas', icon: '💰' },
+    { id: 'consumo', label: 'Consumo', icon: '🚰' },
+    { id: 'servicio', label: 'Servicio', icon: '🔧' },
+    { id: 'pagos', label: 'Pagos', icon: '💳' }
   ];
 
   const handleSuggestionClick = (suggestion) => {
