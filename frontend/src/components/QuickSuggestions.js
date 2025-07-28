@@ -65,6 +65,8 @@ const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
       return;
     }
     onQuickQuery(suggestion.type, suggestion.text);
+    // Cerrar automáticamente el menú después de hacer clic en una sugerencia
+    setIsExpanded(false);
   };
 
   return (
