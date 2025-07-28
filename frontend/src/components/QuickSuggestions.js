@@ -1,9 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './QuickSuggestions.css';
 
 const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
   const [activeTab, setActiveTab] = useState('finanzas');
   const [isExpanded, setIsExpanded] = useState(false);
+  const suggestionRef = useRef(null);
+
+  // Efecto para cerrar el menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
+        setIsExpanded(false);
+      }
+    };
+
+    // Solo agregar el listener si el menú está expandido
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    // Cleanup: remover el listener cuando el componente se desmonte o cambie isExpanded
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
   const suggestions = {
     finanzas: [
@@ -48,7 +68,7 @@ const QuickSuggestions = ({ onQuickQuery, identifier, isLoading }) => {
   };
 
   return (
-    <div className={`quick-suggestions ${isExpanded ? 'expanded' : 'collapsed'}`}>
+    <div ref={suggestionRef} className={`quick-suggestions ${isExpanded ? 'expanded' : 'collapsed'}`}>
       {/* Botón de toggle compacto */}
       <div className="suggestions-toggle" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="toggle-content">
