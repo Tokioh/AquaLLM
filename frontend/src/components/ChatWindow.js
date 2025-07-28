@@ -27,6 +27,9 @@ const ChatWindow = () => {
         return;
     }
 
+    // Normalizar el identificador (convertir a mayúsculas)
+    const normalizedIdentifier = identifier.trim().toUpperCase();
+
     const newUserMessage = { text: userInput, sender: 'user' };
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
     const currentQuestion = userInput;
@@ -43,7 +46,7 @@ const ChatWindow = () => {
         },
         body: JSON.stringify({
           question: currentQuestion,
-          identifier: identifier,
+          identifier: normalizedIdentifier, // Usar el identificador normalizado
           history: conversationHistory,
         }),
       });
@@ -120,6 +123,9 @@ const ChatWindow = () => {
       return;
     }
 
+    // Normalizar el identificador (convertir a mayúsculas)
+    const normalizedIdentifier = identifier.trim().toUpperCase();
+
     // Agregar mensaje del usuario
     const userMessage = { text: questionText, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
@@ -131,7 +137,7 @@ const ChatWindow = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query_type: queryType,
-          identifier: identifier,
+          identifier: normalizedIdentifier, // Usar el identificador normalizado
         }),
       });
 
@@ -177,6 +183,15 @@ ${data.suggestions.map(s => `• ${s}`).join('\n')}
     }
   };
 
+  const handleIdentifierChange = (e) => {
+    const value = e.target.value;
+    // Opcional: normalizar en tiempo real mientras el usuario escribe
+    // setIdentifier(value.toUpperCase());
+    
+    // O mantener el input como está y solo normalizar al enviar
+    setIdentifier(value);
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !isLoading) {
       handleSendMessage();
@@ -211,7 +226,7 @@ ${data.suggestions.map(s => `• ${s}`).join('\n')}
           className="input-field"
           placeholder="Nº Cliente / Medidor (ej. MED00001)"
           value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
+          onChange={handleIdentifierChange}
           disabled={isLoading}
         />
         <input
