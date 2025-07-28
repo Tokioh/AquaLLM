@@ -4,8 +4,8 @@ from fastapi.responses import StreamingResponse
 import json
 import asyncio
 
-from .models.schemas import ChatRequest, ChatResponse
-from .services.database import buscar_datos_cliente
+from .models.schemas import ChatRequest, ChatResponse, QuickQueryRequest, StructuredResponse
+from .services.database import buscar_datos_cliente, CONSULTAS_RAPIDAS
 from .services.llm import construir_prompt, generar_respuesta_llm_ollama
 
 app = FastAPI(
@@ -125,3 +125,28 @@ async def chat_stream_handler(request: ChatRequest):
             "Content-Type": "text/event-stream",
         }
     )
+
+@app.post("/api/quick-query", response_model=StructuredResponse)
+async def quick_query_handler(request: QuickQueryRequest):
+    """
+    Maneja consultas rápidas con respuestas estructuradas.
+    """
+    print(f"Consulta rápida: '{request.query_type}' para identificador: '{request.identifier}'")
+    
+    # Validar tipo de consulta
+    if request.query_type not in CONSULTAS_RAPIDAS:
+        raise HTTPException(status_code=400, detail="Tipo de consulta no válido")
+    
+    # Ejecutar consulta específica
+    try:
+        consulta_func = CONSULTAS_RAPIDAS[request.query_type]
+        resultado = await consulta_func(request.identifier)
+        
+        if resultado.get("error"):
+            raise HTTPException(status_code=404, detail=resultado["error"])
+        
+        return StructuredResponse(**resultado)
+        
+    except Exception as e:
+        print(f"Error en consulta rápida: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")

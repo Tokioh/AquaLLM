@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 class MessageHistory(BaseModel):
     pregunta: str
@@ -12,3 +12,14 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
+
+class QuickQueryRequest(BaseModel):
+    query_type: str  # Tipo de consulta rápida
+    identifier: str  # Identificador del cliente
+
+class StructuredResponse(BaseModel):
+    query_type: str
+    title: str
+    data: Dict[str, Any]
+    summary: str
+    suggestions: List[str]

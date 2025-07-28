@@ -117,3 +117,119 @@ async def obtener_historial_conversacion(session_id: str, limit: int = 3) -> lis
     except Exception as e:
         print(f"Error al obtener el historial de conversación: {e}")
         return []
+
+# =================== FUNCIONES PARA CONSULTAS RÁPIDAS ===================
+
+async def consulta_saldo_actual(identificador: str) -> dict:
+    """Consulta específica para saldo actual del cliente"""
+    if not supabase:
+        return {"error": "Conexión no disponible"}
+    
+    try:
+        datos = await buscar_datos_cliente(identificador)
+        if not datos.get('cliente'):
+            return {"error": "Cliente no encontrado"}
+        
+        facturas_pendientes = [f for f in datos.get('facturas', []) if f['estado_pago'] == 'Pendiente']
+        total_adeudado = sum(f['monto'] for f in facturas_pendientes)
+        
+        return {
+            "tipo_consulta": "saldo_actual",
+            "titulo": "Estado de Cuenta Actual",
+            "datos": {
+                "cliente": datos['cliente']['nombre'] + " " + datos['cliente']['apellido'],
+                "total_adeudado": float(total_adeudado),
+                "facturas_pendientes": len(facturas_pendientes),
+                "proxima_fecha_vencimiento": facturas_pendientes[0]['fecha_vencimiento'] if facturas_pendientes else None
+            },
+            "resumen": f"Su saldo actual es de ${total_adeudado:.2f} con {len(facturas_pendientes)} factura(s) pendiente(s).",
+            "sugerencias": ["¿Cómo puedo pagar mi factura?", "¿Dónde puedo pagar?", "¿Hay descuentos disponibles?"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+async def consulta_consumo_actual(identificador: str) -> dict:
+    """Consulta específica para consumo actual"""
+    try:
+        datos = await buscar_datos_cliente(identificador)
+        if not datos.get('cliente'):
+            return {"error": "Cliente no encontrado"}
+        
+        consumos = datos.get('consumos', [])
+        consumo_actual = consumos[0] if consumos else None
+        promedio = sum(c['consumo_metros_cubicos'] for c in consumos) / len(consumos) if consumos else 0
+        
+        return {
+            "tipo_consulta": "consumo_actual",
+            "titulo": "Consumo de Agua Actual",
+            "datos": {
+                "cliente": datos['cliente']['nombre'] + " " + datos['cliente']['apellido'],
+                "consumo_actual": consumo_actual['consumo_metros_cubicos'] if consumo_actual else 0,
+                "periodo": consumo_actual['periodo'] if consumo_actual else "",
+                "promedio_6_meses": round(promedio, 2),
+                "diferencia_promedio": round((consumo_actual['consumo_metros_cubicos'] - promedio) if consumo_actual else 0, 2)
+            },
+            "resumen": f"Su consumo en {consumo_actual['periodo'] if consumo_actual else 'el periodo actual'} es de {consumo_actual['consumo_metros_cubicos'] if consumo_actual else 0} m³.",
+            "sugerencias": ["¿Cómo ahorrar agua?", "Comparar con mes anterior", "¿Mi consumo es normal?"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+async def consulta_proxima_factura(identificador: str) -> dict:
+    """Consulta específica para próxima fecha de vencimiento"""
+    try:
+        datos = await buscar_datos_cliente(identificador)
+        if not datos.get('cliente'):
+            return {"error": "Cliente no encontrado"}
+        
+        facturas_pendientes = [f for f in datos.get('facturas', []) if f['estado_pago'] == 'Pendiente']
+        facturas_pendientes.sort(key=lambda x: x['fecha_vencimiento'])
+        proxima_factura = facturas_pendientes[0] if facturas_pendientes else None
+        
+        return {
+            "tipo_consulta": "proxima_factura",
+            "titulo": "Próximo Vencimiento",
+            "datos": {
+                "cliente": datos['cliente']['nombre'] + " " + datos['cliente']['apellido'],
+                "fecha_vencimiento": proxima_factura['fecha_vencimiento'] if proxima_factura else None,
+                "monto": float(proxima_factura['monto']) if proxima_factura else 0,
+                "periodo": proxima_factura['periodo'] if proxima_factura else "",
+                "dias_restantes": "Próximo"  # Se puede implementar cálculo de días
+            },
+            "resumen": f"Su próxima factura vence el {proxima_factura['fecha_vencimiento'] if proxima_factura else 'N/A'} por ${proxima_factura['monto'] if proxima_factura else 0}.",
+            "sugerencias": ["¿Cómo puedo pagar?", "¿Puedo pagar en línea?", "¿Dónde puedo pagar?"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+async def consulta_informacion_medidor(identificador: str) -> dict:
+    """Consulta específica para información del medidor"""
+    try:
+        datos = await buscar_datos_cliente(identificador)
+        if not datos.get('cliente'):
+            return {"error": "Cliente no encontrado"}
+        
+        medidor = datos.get('medidor', {})
+        
+        return {
+            "tipo_consulta": "informacion_medidor",
+            "titulo": "Información del Medidor",
+            "datos": {
+                "cliente": datos['cliente']['nombre'] + " " + datos['cliente']['apellido'],
+                "numero_medidor": medidor.get('numero_medidor', 'N/A'),
+                "ubicacion": medidor.get('ubicacion', 'N/A'),
+                "estado_servicio": datos.get('contrato', {}).get('estado_servicio', 'N/A')
+            },
+            "resumen": f"Su medidor #{medidor.get('numero_medidor', 'N/A')} está ubicado en {medidor.get('ubicacion', 'ubicación no especificada')}.",
+            "sugerencias": ["¿Cómo cambiar mi medidor?", "¿Cómo reportar una fuga?", "Estado de mis solicitudes"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+# Mapeo de consultas rápidas
+CONSULTAS_RAPIDAS = {
+    "saldo_actual": consulta_saldo_actual,
+    "consumo_actual": consulta_consumo_actual,
+    "proxima_factura": consulta_proxima_factura,
+    "informacion_medidor": consulta_informacion_medidor,
+}

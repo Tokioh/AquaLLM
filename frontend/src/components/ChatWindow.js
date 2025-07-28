@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import MessageBox from './MessageBox';
+import QuickSuggestions from './QuickSuggestions';
 import './ChatWindow.css';
 
 const ChatWindow = () => {
@@ -106,6 +107,69 @@ const ChatWindow = () => {
     }
   };
 
+  const handleQuickQuery = async (queryType, questionText) => {
+    if (!identifier.trim()) {
+      alert('Por favor, introduce tu número de cliente o medidor primero.');
+      return;
+    }
+
+    // Agregar mensaje del usuario
+    const userMessage = { text: questionText, sender: 'user' };
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/quick-query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query_type: queryType,
+          identifier: identifier,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Formatear respuesta estructurada
+      const formattedResponse = `
+📋 ${data.title}
+
+${data.summary}
+
+📊 Detalles:
+${Object.entries(data.data).map(([key, value]) => 
+  `• ${key.replace(/_/g, ' ')}: ${value}`
+).join('\n')}
+
+💡 Sugerencias:
+${data.suggestions.map(s => `• ${s}`).join('\n')}
+      `.trim();
+
+      const botResponse = { text: formattedResponse, sender: 'bot' };
+      setMessages(prev => [...prev, botResponse]);
+
+      // Actualizar historial de conversación
+      setConversationHistory(prev => [...prev, {
+        pregunta: questionText,
+        respuesta: formattedResponse
+      }]);
+
+    } catch (error) {
+      console.error('Error en consulta rápida:', error);
+      const errorMessage = {
+        text: 'Lo siento, no pude procesar tu consulta rápida. Por favor, intenta de nuevo.',
+        sender: 'bot'
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !isLoading) {
       handleSendMessage();
@@ -114,6 +178,12 @@ const ChatWindow = () => {
 
   return (
     <div className="chat-window">
+      <QuickSuggestions 
+        onQuickQuery={handleQuickQuery}
+        identifier={identifier}
+        isLoading={isLoading}
+      />
+      
       <div className="messages-area">
         {messages.map((msg, index) => (
           <MessageBox key={index} message={msg.text} sender={msg.sender} />
