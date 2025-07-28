@@ -1,5 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import json
+import asyncio
 
 from .models.schemas import ChatRequest, ChatResponse
 from .services.database import buscar_datos_cliente
@@ -55,3 +58,70 @@ async def chat_handler(request: ChatRequest):
 
     # 4. Devolver la respuesta
     return ChatResponse(answer=respuesta_llm)
+
+@app.post("/api/chat-stream")
+async def chat_stream_handler(request: ChatRequest):
+    """
+    Maneja las solicitudes de chat con actualizaciones de estado en tiempo real.
+    """
+    async def generate_status_updates():
+        try:
+            # Paso 1: Validación inicial
+            yield f"data: {json.dumps({'status': 'Iniciando procesamiento...', 'step': 1, 'total': 5})}\n\n"
+            await asyncio.sleep(0.5)  # Simular tiempo de procesamiento
+            
+            # Paso 2: Validar identificador
+            identificador = request.identifier
+            if not identificador:
+                yield f"data: {json.dumps({'status': 'Solicitando identificador del cliente...', 'step': 2, 'total': 5})}\n\n"
+                await asyncio.sleep(0.3)
+                # Construir respuesta para solicitar identificador
+                historial = request.history if request.history else []
+                prompt = construir_prompt(request.question, {}, historial)
+                respuesta_llm = generar_respuesta_llm_ollama(prompt)
+                yield f"data: {json.dumps({'status': 'Completado', 'step': 5, 'total': 5, 'response': respuesta_llm, 'done': True})}\n\n"
+                return
+            
+            yield f"data: {json.dumps({'status': 'Identificador recibido, validando...', 'step': 2, 'total': 5})}\n\n"
+            await asyncio.sleep(0.5)
+            
+            # Paso 3: Consultar base de datos
+            yield f"data: {json.dumps({'status': 'Consultando base de datos...', 'step': 3, 'total': 5})}\n\n"
+            await asyncio.sleep(0.7)
+            
+            datos_cliente = await buscar_datos_cliente(identificador)
+            if datos_cliente.get("error"):
+                yield f"data: {json.dumps({'status': 'Error en base de datos', 'step': 3, 'total': 5, 'error': datos_cliente.get('error')})}\n\n"
+                return
+                
+            yield f"data: {json.dumps({'status': 'Datos del cliente obtenidos exitosamente', 'step': 3, 'total': 5})}\n\n"
+            await asyncio.sleep(0.5)
+            
+            # Paso 4: Preparar consulta para IA
+            yield f"data: {json.dumps({'status': 'Preparando consulta para inteligencia artificial...', 'step': 4, 'total': 5})}\n\n"
+            await asyncio.sleep(0.5)
+            
+            historial = request.history if request.history else []
+            prompt = construir_prompt(request.question, datos_cliente, historial)
+            
+            # Paso 5: Generar respuesta con IA
+            yield f"data: {json.dumps({'status': 'Generando respuesta inteligente...', 'step': 5, 'total': 5})}\n\n"
+            await asyncio.sleep(0.3)
+            
+            respuesta_llm = generar_respuesta_llm_ollama(prompt)
+            
+            # Finalizar
+            yield f"data: {json.dumps({'status': 'Respuesta generada exitosamente', 'step': 5, 'total': 5, 'response': respuesta_llm, 'done': True})}\n\n"
+            
+        except Exception as e:
+            yield f"data: {json.dumps({'status': f'Error: {str(e)}', 'error': True, 'done': True})}\n\n"
+
+    return StreamingResponse(
+        generate_status_updates(),
+        media_type="text/plain",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
+        }
+    )

@@ -7,6 +7,7 @@ const ChatWindow = () => {
   const [userInput, setUserInput] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState('');
   const [conversationHistory, setConversationHistory] = useState([]);
 
   const messagesEndRef = useRef(null);
@@ -27,18 +28,20 @@ const ChatWindow = () => {
 
     const newUserMessage = { text: userInput, sender: 'user' };
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
+    const currentQuestion = userInput;
     setUserInput('');
     setIsLoading(true);
+    setProcessingStatus('Iniciando...');
 
     try {
-      // Se corrige la URL para apuntar directamente al backend en localhost:8000
-      const response = await fetch('http://localhost:8000/api/chat', {
+      // Usar el nuevo endpoint de streaming
+      const response = await fetch('http://localhost:8000/api/chat-stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          question: userInput,
+          question: currentQuestion,
           identifier: identifier,
           history: conversationHistory,
         }),
@@ -48,22 +51,57 @@ const ChatWindow = () => {
         throw new Error(`Error del servidor: ${response.status}`);
       }
 
-      const data = await response.json();
-      const botResponse = { text: data.answer, sender: 'bot' };
-      setMessages(prevMessages => [...prevMessages, botResponse]);
-      
-      // Actualizar el historial de conversación con esta interacción
-      const newHistoryItem = {
-        pregunta: userInput,
-        respuesta: data.answer
-      };
-      setConversationHistory(prev => [...prev, newHistoryItem]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.status) {
+                setProcessingStatus(`${data.status} (${data.step}/${data.total})`);
+              }
+              
+              if (data.done && data.response) {
+                // Respuesta final recibida
+                const botResponse = { text: data.response, sender: 'bot' };
+                setMessages(prevMessages => [...prevMessages, botResponse]);
+                
+                // Actualizar el historial de conversación
+                const newHistoryItem = {
+                  pregunta: currentQuestion,
+                  respuesta: data.response
+                };
+                setConversationHistory(prev => [...prev, newHistoryItem]);
+                
+                setProcessingStatus('');
+                setIsLoading(false);
+                return;
+              }
+              
+              if (data.error) {
+                throw new Error(data.status || 'Error desconocido');
+              }
+            } catch (parseError) {
+              console.error('Error parsing JSON:', parseError);
+            }
+          }
+        }
+      }
 
     } catch (error) {
       console.error("Error al llamar a la API:", error);
-      const errorMessage = { text: "Lo siento, no pude conectarme con el sistemas. Por favor, intenta de nuevo más tarde.", sender: 'bot' };
+      const errorMessage = { text: "Lo siento, no pude conectarme con mis sistemas. Por favor, intenta de nuevo más tarde.", sender: 'bot' };
       setMessages(prevMessages => [...prevMessages, errorMessage]);
-    } finally {
+      setProcessingStatus('');
       setIsLoading(false);
     }
   };
@@ -80,7 +118,14 @@ const ChatWindow = () => {
         {messages.map((msg, index) => (
           <MessageBox key={index} message={msg.text} sender={msg.sender} />
         ))}
-        {isLoading && <MessageBox message="Escribiendo..." sender="bot" />}
+        {isLoading && (
+          <div className="processing-status">
+            <div className="status-indicator">
+              <div className="loading-spinner"></div>
+              <span>{processingStatus || 'Procesando...'}</span>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       <div className="input-area">
