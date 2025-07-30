@@ -9,7 +9,7 @@ function App() {
   };
 
   const handleContact = () => {
-    alert('📞 Contacta con nosotros:\n\n• Teléfono: 1-800-AGUA-123\n• Email: soporte@aquallm.com\n• Horario: Lun-Vie 8:00-18:00');
+    alert('📞 Contacta con nosotros:\n\n• Teléfono: (05)262-1300 ext.30\n• Email: atencionalcliente@epam.gob.ec\n• Horario: Lun-Vie 8:00-18:00');
   };
 
   const handleImageError = (e) => {

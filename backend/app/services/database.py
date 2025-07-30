@@ -51,7 +51,7 @@ async def buscar_datos_cliente(identificador: str) -> dict:
         else:
             # Si no es un medidor, podría ser un número de factura (menos común, pero posible)
             # Esta lógica se puede expandir. Por simplicidad, nos centraremos en medidor y ID de cliente.
-            # Podríamos añadir búsqueda por ID de factura o DNI del cliente aquí.
+            # Podríamos añadir búsqueda por ID de factura o Cedula del cliente aquí.
 
             # Intentamos buscar por ID de cliente (si el identificador es un número)
             if identificador.isdigit():
@@ -408,12 +408,12 @@ async def consulta_reportar_fuga(identificador: str) -> dict:
         "query_type": "reportar_fuga",
         "title": "¿Cómo Reportar una Fuga?",
         "data": {
-            "telefono_emergencia": "123-456-7890",
+            "telefono_emergencia": "(05)262-1300 ext.3",
             "horario_atencion": "24 horas",
             "tiempo_respuesta": "2-4 horas",
             "documentos_necesarios": "Ninguno para emergencias"
         },
-        "summary": "Para reportar una fuga, llame al 123-456-7890. Atendemos 24 horas y respondemos en 2-4 horas.",
+        "summary": "Para reportar una fuga, llame al (05)262-1300 ext.3. Atendemos 24 horas y respondemos en 2-4 horas.",
         "suggestions": ["Cerrar llave de paso", "Tomar fotos del problema", "Estar disponible para la visita"]
     }
 
@@ -453,9 +453,9 @@ async def consulta_donde_pagar(identificador: str) -> dict:
         "query_type": "donde_pagar",
         "title": "¿Dónde Puedo Pagar?",
         "data": {
-            "oficinas_principales": "Centro comercial AquaPlaza",
-            "bancos_afiliados": "Banco Nacional, Banco Popular",
-            "supermercados": "Megasuper, Maxi Palí",
+            "oficinas_principales": "Centro de Manta Epam",
+            "bancos_afiliados": "Banco Pacifico, Banco guayaquil",
+            "supermercados": "Megamaxi, Farmacias cruz azul",
             "horarios": "Lunes a viernes 8:00-17:00"
         },
         "summary": "Puede pagar en nuestras oficinas, bancos afiliados o supermercados de lunes a viernes de 8:00 a 17:00.",
@@ -469,11 +469,11 @@ async def consulta_pago_online(identificador: str) -> dict:
         "title": "¿Puedo Pagar en Línea?",
         "data": {
             "disponibilidad": "24 horas, 7 días",
-            "metodos_aceptados": "Tarjetas de crédito/débito, SINPE",
+            "metodos_aceptados": "Tarjetas de crédito/débito",
             "comision": "Sin comisión",
             "confirmacion": "Inmediata por email y SMS"
         },
-        "summary": "Sí, puede pagar en línea 24/7 con tarjetas o SINPE, sin comisión y con confirmación inmediata.",
+        "summary": "Sí, puede pagar en línea 24/7 con tarjetas, sin comisión y con confirmación inmediata.",
         "suggestions": ["Acceder al portal de pagos", "Descargar app móvil", "Registrarse para pago automático"]
     }
 
@@ -485,10 +485,10 @@ async def consulta_descuentos(identificador: str) -> dict:
         "data": {
             "descuento_puntual": "5% por pago antes del vencimiento",
             "descuento_tercera_edad": "10% para mayores de 65 años",
-            "descuento_estudiantes": "15% para estudiantes universitarios",
+            "descuento_estudiantes": "10% para estudiantes universitarios",
             "programa_lealtad": "Puntos por pagos puntuales"
         },
-        "summary": "Ofrecemos descuentos del 5% por pago puntual, 10% tercera edad y 15% estudiantes universitarios.",
+        "summary": "Ofrecemos descuentos del 5% por pago puntual, 10% tercera edad y 10% estudiantes universitarios.",
         "suggestions": ["Aplicar descuento tercera edad", "Verificar elegibilidad estudiantes", "Programa de lealtad"]
     }
 
