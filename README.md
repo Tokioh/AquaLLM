@@ -1,10 +1,6 @@
 # AquaLLM - Sistema de Atención al Cliente con IA
 
 Un sistema de chatbot inteligente diseñado para que las empresas de agua potable ofrezcan atención al cliente 24/7. El chatbot puede responder preguntas sobre facturación, consumo, contratos y solicitudes utilizando una base de datos de clientes y un modelo de lenguaje local (Ollama).
-
-![Diagrama de Arquitectura](https://i.imgur.com/URL_DEL_DIAGRAMA.png) 
-*Nota: Sube el diagrama de tu archivo `Editado.md` a un servicio como [Imgur](https://imgur.com/upload) y pega el enlace aquí.*
-
 ---
 
 ## 🚀 Tecnologías Utilizadas
